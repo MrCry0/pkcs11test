@@ -32,7 +32,7 @@ namespace test {
 
 namespace {
 
-class KeyPairTest : public ReadWriteSessionTest {
+class KeyPairTest : public RWUserSessionTest {
  public:
   KeyPairTest()
     : public_attrs_({CKA_ENCRYPT, CKA_TOKEN}),
@@ -124,7 +124,7 @@ TEST_F(KeyPairTest, EncryptDecrypt) {
   EXPECT_EQ(0, memcmp(plaintext, recovered_plaintext, plaintext_len));
 }
 
-TEST_F(ReadWriteSessionTest, PublicExponent4Bytes) {
+TEST_F(RWUserSessionTest, PublicExponent4Bytes) {
   CK_ULONG modulus_bits = 1024;
   CK_BYTE public_exponent_value[] = {0x00, 0x1, 0x0, 0x1}; // 65537=0x00010001
   vector<CK_ATTRIBUTE> public_attrs = {
@@ -152,7 +152,7 @@ TEST_F(ReadWriteSessionTest, PublicExponent4Bytes) {
   }
 }
 
-TEST_F(ReadWriteSessionTest, ExtractKeys) {
+TEST_F(RWUserSessionTest, ExtractKeys) {
   vector<CK_ATTRIBUTE_TYPE> public_attrs = {CKA_ENCRYPT};
   vector<CK_ATTRIBUTE_TYPE> private_attrs = {CKA_DECRYPT, CKA_SENSITIVE};
   KeyPair keypair(session_, public_attrs, private_attrs);
@@ -182,7 +182,7 @@ TEST_F(ReadWriteSessionTest, ExtractKeys) {
 
 }
 
-TEST_F(ReadWriteSessionTest, AsymmetricTokenKeyPair) {
+TEST_F(RWUserSessionTest, AsymmetricTokenKeyPair) {
   // Attempt to create a keypair with the private key on the token but
   // the public key not.
   CK_ULONG modulus_bits = 1024;
@@ -214,7 +214,7 @@ TEST_F(ReadWriteSessionTest, AsymmetricTokenKeyPair) {
   }
 }
 
-TEST_F(ReadOnlySessionTest, CreateKeyPairObjects) {
+TEST_F(ROUserSessionTest, CreateKeyPairObjects) {
   RSAKeyData keydata = kRsaKey1;
   CK_OBJECT_HANDLE public_key;
   CK_OBJECT_HANDLE private_key;
