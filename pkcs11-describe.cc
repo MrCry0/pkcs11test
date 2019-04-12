@@ -444,8 +444,13 @@ string mechanism_type_name(CK_MECHANISM_TYPE val) {
     case CKM_AES_CBC: return "CKM_AES_CBC";
     case CKM_AES_MAC: return "CKM_AES_MAC";
     case CKM_AES_MAC_GENERAL: return "CKM_AES_MAC_GENERAL";
+    case CKM_AES_CMAC: return "CKM_AES_CMAC";
+    case CKM_AES_CMAC_GENERAL: return "CKM_AES_CMAC_GENERAL";
     case CKM_AES_CBC_PAD: return "CKM_AES_CBC_PAD";
     case CKM_AES_CTR: return "CKM_AES_CTR";
+    case CKM_AES_GCM: return "CKM_AES_GCM";
+    case CKM_AES_KEY_WRAP: return "CKM_AES_KEY_WRAP";
+    case CKM_AES_KEY_WRAP_PAD: return "CKM_AES_KEY_WRAP_PAD";
     case CKM_BLOWFISH_KEY_GEN: return "CKM_BLOWFISH_KEY_GEN";
     case CKM_BLOWFISH_CBC: return "CKM_BLOWFISH_CBC";
     case CKM_TWOFISH_KEY_GEN: return "CKM_TWOFISH_KEY_GEN";
