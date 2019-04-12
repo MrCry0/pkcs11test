@@ -226,6 +226,10 @@ string mechanism_type_name(CK_MECHANISM_TYPE val) {
     case CKM_DSA_KEY_PAIR_GEN: return "CKM_DSA_KEY_PAIR_GEN";
     case CKM_DSA: return "CKM_DSA";
     case CKM_DSA_SHA1: return "CKM_DSA_SHA1";
+    case CKM_DSA_SHA224: return "CKM_DSA_SHA224";
+    case CKM_DSA_SHA256: return "CKM_DSA_SHA256";
+    case CKM_DSA_SHA384: return "CKM_DSA_SHA384";
+    case CKM_DSA_SHA512: return "CKM_DSA_SHA512";
     case CKM_DH_PKCS_KEY_PAIR_GEN: return "CKM_DH_PKCS_KEY_PAIR_GEN";
     case CKM_DH_PKCS_DERIVE: return "CKM_DH_PKCS_DERIVE";
     case CKM_X9_42_DH_KEY_PAIR_GEN: return "CKM_X9_42_DH_KEY_PAIR_GEN";
