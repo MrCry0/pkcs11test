@@ -250,7 +250,7 @@ TEST_F(ReadWriteSessionTest, CreateObjectInvalid) {
              g_fns->C_CreateObject(session_, attr_value, 1, &object));
 }
 
-TEST_F(ReadWriteSessionTest, SetLatchingAttribute) {
+TEST_F(RWUserSessionTest, SetLatchingAttribute) {
   // Start with an non-sensitive key object.
   ObjectAttributes attrs;
   SecretKey key(session_, attrs);
@@ -418,7 +418,7 @@ TEST_F(DataObjectTest, FindObject) {
   EXPECT_CKR_OK(g_fns->C_FindObjectsFinal(session_));
 }
 
-TEST_F(ReadWriteSessionTest, FindObjectSubset) {
+TEST_F(RWUserSessionTest, FindObjectSubset) {
   // Create a selection of objects.
   vector<CK_ATTRIBUTE_TYPE> attrs = {CKA_ENCRYPT, CKA_DECRYPT};
   SecretKey des_key1(session_, attrs, CKM_DES_KEY_GEN, -1);
