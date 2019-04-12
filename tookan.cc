@@ -40,6 +40,10 @@ TEST_F(RWUserSessionTest, TookanAttackA1) {
     TEST_SKIPPED("Key wrapping not supported");
     return;
   }
+  if (rv == CKR_MECHANISM_INVALID) {
+    TEST_SKIPPED("Mechanism for key wrapping not suported");
+    return;
+  }
   EXPECT_TRUE(rv == CKR_KEY_NOT_WRAPPABLE ||
               rv == CKR_KEY_UNEXTRACTABLE) << " rv=" << CK_RV_(rv);
 
