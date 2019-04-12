@@ -35,7 +35,7 @@ namespace test {
 
 namespace {
 
-class SignTest : public ReadOnlySessionTest,
+class SignTest : public ROUserSessionTest,
                  public ::testing::WithParamInterface<string> {
  public:
   SignTest()
@@ -108,7 +108,7 @@ TEST_P(SignTest, SignFailVerifyShort) {
              g_fns->C_Verify(session_, data_.get(), datalen_, output, 4));
 }
 
-TEST_F(ReadOnlySessionTest, SignVerifyRecover) {
+TEST_F(ROUserSessionTest, SignVerifyRecover) {
   vector<CK_ATTRIBUTE_TYPE> public_attrs = {CKA_VERIFY_RECOVER, CKA_ENCRYPT};
   vector<CK_ATTRIBUTE_TYPE> private_attrs = {CKA_SIGN_RECOVER, CKA_DECRYPT};
   KeyPair keypair(session_, public_attrs, private_attrs);
