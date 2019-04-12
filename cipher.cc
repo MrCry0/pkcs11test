@@ -559,7 +559,7 @@ INSTANTIATE_TEST_CASE_P(Ciphers, SecretKeyTest,
                                           "AES-ECB",
                                           "AES-CBC"));
 
-TEST_F(ReadOnlySessionTest, CreateSecretKeyAttributes) {
+TEST_F(ROUserSessionTest, CreateSecretKeyAttributes) {
   string key = hex_decode("");
   CK_OBJECT_CLASS key_class = CKO_SECRET_KEY;
   CK_KEY_TYPE key_type = CKK_DES;
@@ -597,7 +597,7 @@ TEST_F(ReadOnlySessionTest, CreateSecretKeyAttributes) {
   ASSERT_CKR_OK(g_fns->C_DestroyObject(session_, key_object));
 }
 
-TEST_F(ReadOnlySessionTest, SecretKeyTestVectors) {
+TEST_F(ROUserSessionTest, SecretKeyTestVectors) {
   for (const auto& kv : kTestVectors) {
     vector<TestData> testcases = kTestVectors[kv.first];
     CipherInfo info = kCipherInfo[kv.first];
