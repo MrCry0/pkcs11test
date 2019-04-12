@@ -96,7 +96,7 @@ TEST_F(ReadOnlySessionTest, DigestInitInvalid) {
              g_fns->C_DigestInit(session_, &mechanism));
 }
 
-class DigestTest : public ReadOnlySessionTest,
+class DigestTest : public ROUserSessionTest,
                    public ::testing::WithParamInterface<string> {
  public:
   DigestTest()
