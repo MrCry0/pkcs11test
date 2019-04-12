@@ -328,12 +328,12 @@ TEST_F(PKCS11Test, TokenInit) {
   // User PIN will have been reset, so need to set it. Use a new session (which also checks that the SO PIN is still OK).
   {
     RWSOSession session(g_so_pin);
-    EXPECT_CKR_OK(g_fns->C_InitPIN(session.handle(), (CK_UTF8CHAR_PTR)g_user_pin, strlen(g_user_pin)));
+    EXPECT_CKR_OK(g_fns->C_InitPIN(session.handle(), (CK_UTF8CHAR_PTR)g_reset_user_pin, strlen(g_reset_user_pin)));
   }
   // Check the user PIN is as expected.
   {
     ROSession session;
-    EXPECT_CKR_OK(g_fns->C_Login(session.handle(), CKU_USER, (CK_UTF8CHAR_PTR)g_user_pin, strlen(g_user_pin)));
+    EXPECT_CKR_OK(g_fns->C_Login(session.handle(), CKU_USER, (CK_UTF8CHAR_PTR)g_reset_user_pin, strlen(g_reset_user_pin)));
     g_fns->C_Logout(session.handle());
   }
   // TODO(drysdale): figure this out
