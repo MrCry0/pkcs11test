@@ -86,7 +86,7 @@ map<string, vector<TestData> > kTestVectors = {
 
 }  // namespace
 
-class HmacTest : public ReadOnlySessionTest,
+class HmacTest : public ROUserSessionTest,
                  public ::testing::WithParamInterface<string> {
  public:
   HmacTest()
@@ -172,7 +172,7 @@ INSTANTIATE_TEST_CASE_P(HMACs, HmacTest,
                                           "SHA384-HMAC",
                                           "SHA512-HMAC"));
 
-TEST_F(ReadOnlySessionTest, HmacTestVectors) {
+TEST_F(ROUserSessionTest, HmacTestVectors) {
   for (const auto& kv : kTestVectors) {
     vector<TestData> testcases = kTestVectors[kv.first];
     HmacInfo info = kHmacInfo[kv.first];
