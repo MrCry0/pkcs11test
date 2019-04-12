@@ -21,7 +21,7 @@ using namespace std;  // So sue me
 namespace pkcs11 {
 namespace test {
 
-TEST_F(ReadWriteSessionTest, TookanAttackA1) {
+TEST_F(RWUserSessionTest, TookanAttackA1) {
   // First, create a sensitive key k1.
   vector<CK_ATTRIBUTE_TYPE> k1_attrs = {CKA_SENSITIVE};
   SecretKey k1(session_, k1_attrs);
@@ -87,7 +87,7 @@ TEST_F(RWEitherSessionTest, TookanAttackA2) {
   }
 }
 
-TEST_F(ReadWriteSessionTest, TookanAttackA3) {
+TEST_F(RWUserSessionTest, TookanAttackA3) {
   // Create a sensitive key.
   vector<CK_ATTRIBUTE_TYPE> key_attrs = {CKA_SENSITIVE};
   SecretKey key(session_, key_attrs);
@@ -98,7 +98,7 @@ TEST_F(ReadWriteSessionTest, TookanAttackA3) {
   EXPECT_CKR(CKR_ATTRIBUTE_SENSITIVE, rv);
 }
 
-TEST_F(ReadWriteSessionTest, TookanAttackA4) {
+TEST_F(RWUserSessionTest, TookanAttackA4) {
   // Create a non-extractable key.
   ObjectAttributes key_attrs;
   CK_ATTRIBUTE extractable_attr = {CKA_EXTRACTABLE, (CK_VOID_PTR)&g_ck_false, sizeof(CK_BBOOL)};
@@ -113,7 +113,7 @@ TEST_F(ReadWriteSessionTest, TookanAttackA4) {
   EXPECT_CKR(CKR_ATTRIBUTE_SENSITIVE, rv);
 }
 
-TEST_F(ReadWriteSessionTest, TookanAttackA5a) {
+TEST_F(RWUserSessionTest, TookanAttackA5a) {
   // Create a sensitive key.
   vector<CK_ATTRIBUTE_TYPE> key_attrs = {CKA_SENSITIVE};
   SecretKey key(session_, key_attrs);
@@ -130,7 +130,7 @@ TEST_F(ReadWriteSessionTest, TookanAttackA5a) {
   EXPECT_EQ(CK_TRUE, (CK_BBOOL)data[0]);
 }
 
-TEST_F(ReadWriteSessionTest, TookanAttackA5b) {
+TEST_F(RWUserSessionTest, TookanAttackA5b) {
   // Create a non-extractable key.
   ObjectAttributes key_attrs;
   CK_ATTRIBUTE extractable_attr = {CKA_EXTRACTABLE, (CK_VOID_PTR)&g_ck_false, sizeof(CK_BBOOL)};
