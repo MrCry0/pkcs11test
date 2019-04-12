@@ -44,7 +44,11 @@ class DualSecretKeyTest : public SecretKeyTest {
 TEST_P(DualSecretKeyTest, DigestEncrypt) {
   // Start digest and encryption operations
   ASSERT_CKR_OK(g_fns->C_DigestInit(session_, &digest_mechanism_));
-  ASSERT_CKR_OK(g_fns->C_EncryptInit(session_, &mechanism_, key_.handle()));
+  CK_RV rv = g_fns->C_EncryptInit(session_, &mechanism_, key_.handle());
+  if (rv == CKR_OPERATION_ACTIVE) {
+      TEST_SKIPPED("Dual digest+encrypt not supported");
+      return;
+  }
 
   CK_BYTE ciphertext[1024];
   CK_ULONG ciphertext_bufsize = sizeof(ciphertext);
@@ -55,9 +59,9 @@ TEST_P(DualSecretKeyTest, DigestEncrypt) {
   for (int block = 0; block < kNumBlocks; ++block) {
     part = ciphertext + (block * info_.blocksize);
     part_len = ciphertext_bufsize - (part - ciphertext);
-    CK_RV rv = g_fns->C_DigestEncryptUpdate(session_,
-                                            plaintext_.get() + block * info_.blocksize, info_.blocksize,
-                                            part, &part_len);
+    rv = g_fns->C_DigestEncryptUpdate(session_,
+                                      plaintext_.get() + block * info_.blocksize, info_.blocksize,
+                                      part, &part_len);
     if (block == 0 && rv == CKR_FUNCTION_NOT_SUPPORTED) {
       TEST_SKIPPED("Dual digest+encrypt not supported");
       return;
