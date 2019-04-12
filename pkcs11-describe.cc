@@ -264,6 +264,8 @@ string mechanism_type_name(CK_MECHANISM_TYPE val) {
     case CKM_DES3_CBC: return "CKM_DES3_CBC";
     case CKM_DES3_MAC: return "CKM_DES3_MAC";
     case CKM_DES3_MAC_GENERAL: return "CKM_DES3_MAC_GENERAL";
+    case CKM_DES3_CMAC: return "CKM_DES3_CMAC";
+    case CKM_DES3_CMAC_GENERAL: return "CKM_DES3_CMAC_GENERAL";
     case CKM_DES3_CBC_PAD: return "CKM_DES3_CBC_PAD";
     case CKM_CDMF_KEY_GEN: return "CKM_CDMF_KEY_GEN";
     case CKM_CDMF_ECB: return "CKM_CDMF_ECB";
