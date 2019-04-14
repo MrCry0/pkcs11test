@@ -358,7 +358,7 @@ TEST_F(PKCS11Test, TokenInitPinIncorrect) {
     TEST_SKIPPED("Destructive token re-initialization not performed");
     return;
   }
-  const char* wrong_pin = "wrong";
+  const char* wrong_pin = "wrongwrong";
   EXPECT_CKR(CKR_PIN_INCORRECT, g_fns->C_InitToken(g_slot_id, (CK_UTF8CHAR_PTR)wrong_pin, strlen(wrong_pin), g_token_label));
 }
 
