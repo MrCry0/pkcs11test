@@ -145,7 +145,12 @@ TEST_F(ReadWriteSessionTest, CreateCopyDestroyObject) {
 
   // Create a copy with the same attributes.
   CK_OBJECT_HANDLE object2;
-  EXPECT_CKR_OK(g_fns->C_CopyObject(session_, object, attrs, 0, &object2));
+  CK_RV rv = g_fns->C_CopyObject(session_, object, attrs, 0, &object2);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("CopyObject not supported");
+    return;
+  }
+  EXPECT_CKR_OK(rv);
 
   CK_ULONG object2_size;
   EXPECT_CKR_OK(g_fns->C_GetObjectSize(session_, object, &object2_size));
@@ -311,8 +316,12 @@ TEST_F(DataObjectTest, CopyDestroyObjectInvalid) {
              g_fns->C_GetObjectSize(session_, object_, NULL_PTR));
 
   CK_ATTRIBUTE attr;
-  EXPECT_CKR(CKR_ARGUMENTS_BAD,
-             g_fns->C_CopyObject(session_, object_, &attr, 0, NULL_PTR));
+  CK_RV rv = g_fns->C_CopyObject(session_, object_, &attr, 0, NULL_PTR);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("CopyObject not supported");
+    return;
+  }
+  EXPECT_CKR(CKR_ARGUMENTS_BAD, rv);
   CK_OBJECT_HANDLE object2;
   EXPECT_CKR(CKR_ARGUMENTS_BAD,
              g_fns->C_CopyObject(session_, object_, NULL, 1, &object2));
