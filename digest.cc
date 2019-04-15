@@ -79,6 +79,10 @@ map<string, vector<TestData> > kTestVectors = {
 string Digest(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mechanism,
               CK_BYTE_PTR data, CK_ULONG datalen) {
   CK_RV rv = g_fns->C_DigestInit(session, mechanism);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("DigestInit not supported");
+    return "not supported";
+  }
   if (rv == CKR_MECHANISM_INVALID) return "unimplemented";
   EXPECT_CKR_OK(rv);
   CK_BYTE buffer[512];
@@ -92,8 +96,12 @@ string Digest(CK_SESSION_HANDLE session, CK_MECHANISM_PTR mechanism,
 
 TEST_F(ReadOnlySessionTest, DigestInitInvalid) {
   CK_MECHANISM mechanism = {999, NULL_PTR, 0};
-  EXPECT_CKR(CKR_MECHANISM_INVALID,
-             g_fns->C_DigestInit(session_, &mechanism));
+  CK_RV rv = g_fns->C_DigestInit(session_, &mechanism);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("DigestInit not supported");
+    return;
+  }
+  EXPECT_CKR(CKR_MECHANISM_INVALID, rv);
 }
 
 class DigestTest : public ROUserSessionTest,
@@ -400,7 +408,7 @@ TEST_F(ReadOnlySessionTest, DigestTestVectors) {
     for (const TestData& testcase : kv.second) {
       string actual = Digest(session_, &mechanism,
                              (CK_BYTE_PTR)testcase.input.data(), testcase.input.size());
-      if (actual == "unimplemented")
+      if (actual == "unimplemented" || actual == "not supported")
         continue;
       string hex_actual = hex_data(actual);
       EXPECT_EQ(testcase.output, hex_actual) << " for input '" << testcase.input << "'";
