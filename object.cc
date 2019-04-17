@@ -176,7 +176,12 @@ TEST_F(ReadWriteSessionTest, CreateCopyDestroyObject) {
   // Modify an attribute on the original object.
   CK_UTF8CHAR new_label[] = "NewLabel";
   CK_ATTRIBUTE set_attr = {CKA_LABEL, new_label, 8};
-  EXPECT_CKR_OK(g_fns->C_SetAttributeValue(session_, object, &set_attr, 1));
+  rv = g_fns->C_SetAttributeValue(session_, object, &set_attr, 1);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("SetAttributeValue not supported");
+    return;
+  }
+  EXPECT_CKR_OK(rv);
 
   // Unaffected on the copy, changed on the original.
   get_attr.type = CKA_LABEL;
@@ -259,13 +264,22 @@ TEST_F(RWUserSessionTest, SetLatchingAttribute) {
   // Start with an non-sensitive key object.
   ObjectAttributes attrs;
   SecretKey key(session_, attrs);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
   CK_BBOOL bvalue;
   CK_ATTRIBUTE attr = {CKA_SENSITIVE, &bvalue, sizeof(bvalue)};
 
   // Make it sensitive.
   bvalue = CK_TRUE;
   attr.ulValueLen = sizeof(bvalue);
-  EXPECT_CKR_OK(g_fns->C_SetAttributeValue(session_, key.handle(), &attr, 1));
+  CK_RV rv = g_fns->C_SetAttributeValue(session_, key.handle(), &attr, 1);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("SetAttributeValue not supported");
+    return;
+  }
+  EXPECT_CKR_OK(rv);
 
   attr.ulValueLen = sizeof(bvalue);
   EXPECT_CKR_OK(g_fns->C_GetAttributeValue(session_, key.handle(), &attr, 1));
@@ -343,8 +357,12 @@ TEST_F(DataObjectTest, DISABLED_SetInvalidAttributeLen) {
   // If this accidentally gets left in place for a C_SetAttributeValue call, the
   // library should cope.
   attr.ulValueLen = (CK_ULONG)-1;
-  EXPECT_CKR(CKR_ATTRIBUTE_VALUE_INVALID,
-             g_fns->C_SetAttributeValue(session_, object_, &attr, 1));
+  CK_RV rv = g_fns->C_SetAttributeValue(session_, object_, &attr, 1);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("SetAttributeValue not supported");
+    return;
+  }
+  EXPECT_CKR(CKR_ATTRIBUTE_VALUE_INVALID, rv);
 }
 
 TEST_F(DataObjectTest, GetMultipleAttributes) {
@@ -396,8 +414,12 @@ TEST_F(DataObjectTest, GetSetAttributeInvalid) {
 
   CK_UTF8CHAR new_label[] = "NewLabel";
   CK_ATTRIBUTE set_attr = {CKA_LABEL, new_label, 8};
-  EXPECT_CKR(CKR_SESSION_HANDLE_INVALID,
-             g_fns->C_SetAttributeValue(INVALID_SESSION_HANDLE, object_, &set_attr, 1));
+  rv = g_fns->C_SetAttributeValue(INVALID_SESSION_HANDLE, object_, &set_attr, 1);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("SetAttributeValue not supported");
+    return;
+  }
+  EXPECT_CKR(CKR_SESSION_HANDLE_INVALID, rv);
   EXPECT_CKR(CKR_OBJECT_HANDLE_INVALID,
              g_fns->C_SetAttributeValue(session_, INVALID_OBJECT_HANDLE, &set_attr, 1));
 

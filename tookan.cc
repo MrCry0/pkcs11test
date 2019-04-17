@@ -148,6 +148,10 @@ TEST_F(RWUserSessionTest, TookanAttackA5a) {
   // Try to change it to be non-sensitive
   CK_ATTRIBUTE attr = {CKA_SENSITIVE, (CK_VOID_PTR)&g_ck_false, sizeof(CK_BBOOL)};
   CK_RV rv = g_fns->C_SetAttributeValue(session_, key.handle(), &attr, 1);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("SetAttributeValue not supported");
+    return;
+  }
   EXPECT_CKR(CKR_ATTRIBUTE_READ_ONLY, rv);
 
   // Check the attribute is unchanged.
@@ -173,6 +177,10 @@ TEST_F(RWUserSessionTest, TookanAttackA5b) {
   // Try to change it to be extractable
   CK_ATTRIBUTE attr = {CKA_EXTRACTABLE, (CK_VOID_PTR)&g_ck_true, sizeof(CK_BBOOL)};
   CK_RV rv = g_fns->C_SetAttributeValue(session_, key.handle(), &attr, 1);
+  if (rv == CKR_FUNCTION_NOT_SUPPORTED) {
+    TEST_SKIPPED("SetAttributeValue not supported");
+    return;
+  }
   EXPECT_CKR(CKR_ATTRIBUTE_READ_ONLY, rv);
 
   // Check the attribute is unchanged.
