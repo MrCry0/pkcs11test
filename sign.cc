@@ -112,6 +112,9 @@ TEST_F(ROUserSessionTest, SignVerifyRecover) {
   vector<CK_ATTRIBUTE_TYPE> public_attrs = {CKA_VERIFY_RECOVER, CKA_ENCRYPT};
   vector<CK_ATTRIBUTE_TYPE> private_attrs = {CKA_SIGN_RECOVER, CKA_DECRYPT};
   KeyPair keypair(session_, public_attrs, private_attrs);
+  if (!keypair.valid()) {
+    TEST_SKIPPED("Unable to generate valid keypairs");
+  }
   const int datalen = 64;
   unique_ptr<CK_BYTE, freer> data = randmalloc(datalen);
   CK_MECHANISM mechanism = {CKM_RSA_PKCS, NULL_PTR, 0};

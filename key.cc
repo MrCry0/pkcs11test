@@ -102,6 +102,10 @@ TEST_F(ROUserSessionTest, WrapUnwrap) {
 
   vector<CK_ATTRIBUTE_TYPE> k2_attrs = {CKA_WRAP, CKA_UNWRAP, CKA_DECRYPT};
   SecretKey k2(session_, k2_attrs);
+  if (!k1.valid() || !k2.valid()) {
+    TEST_SKIPPED("Unable to generate valid keys");
+    return;
+  }
 
   // Use k2 to wrap k1.
   CK_MECHANISM wrap_mechanism = {CKM_DES_ECB, NULL_PTR, 0};
@@ -158,6 +162,10 @@ TEST_F(ROUserSessionTest, WrapInvalid) {
 
   vector<CK_ATTRIBUTE_TYPE> k2_attrs = {CKA_WRAP, CKA_UNWRAP, CKA_DECRYPT};
   SecretKey k2(session_, k2_attrs);
+  if (!k1.valid() || !k2.valid()) {
+    TEST_SKIPPED("Unable to generate valid keys");
+    return;
+  }
 
   // Use k2 to wrap k1.
   CK_MECHANISM wrap_mechanism = {CKM_DES_ECB, NULL_PTR, 0};
@@ -198,6 +206,10 @@ TEST_F(ROUserSessionTest, UnwrapInvalid) {
 
   vector<CK_ATTRIBUTE_TYPE> k2_attrs = {CKA_WRAP, CKA_UNWRAP, CKA_DECRYPT};
   SecretKey k2(session_, k2_attrs);
+  if (!k1.valid() || !k2.valid()) {
+    TEST_SKIPPED("Unable to generate valid keys");
+    return;
+  }
 
   // Use k2 to wrap k1.
   CK_MECHANISM wrap_mechanism = {CKM_DES_ECB, NULL_PTR, 0};

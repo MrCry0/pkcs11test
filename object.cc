@@ -433,10 +433,17 @@ TEST_F(RWUserSessionTest, FindObjectSubset) {
   SecretKey des_key1(session_, attrs, CKM_DES_KEY_GEN, -1);
   SecretKey des_key2(session_, attrs, CKM_DES_KEY_GEN, -1);
   SecretKey aes_key3(session_, attrs, CKM_AES_KEY_GEN, 16);
+  if (!des_key1.valid() || !des_key2.valid() || !aes_key3.valid()) {
+    TEST_SKIPPED("Unable to generate valid keys");
+    return;
+  }
   vector<CK_ATTRIBUTE_TYPE> public_attrs = {CKA_ENCRYPT};
   vector<CK_ATTRIBUTE_TYPE> private_attrs = {CKA_DECRYPT};
   KeyPair keypair1(session_, public_attrs, private_attrs);
   KeyPair keypair2(session_, public_attrs, private_attrs);
+  if (!keypair1.valid() || !keypair2.valid()) {
+    TEST_SKIPPED("Unable to generate valid keypairs");
+  }
 
   CK_ATTRIBUTE label_attrs[] = {
     {CKA_LABEL, (CK_VOID_PTR)g_label, g_label_len},

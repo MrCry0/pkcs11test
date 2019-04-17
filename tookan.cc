@@ -29,6 +29,10 @@ TEST_F(RWUserSessionTest, TookanAttackA1) {
   // Second, create a key k2 with wrap & decrypt
   vector<CK_ATTRIBUTE_TYPE> k2_attrs = {CKA_WRAP, CKA_DECRYPT};
   SecretKey k2(session_, k2_attrs);
+  if (!k1.valid() || !k2.valid()) {
+    TEST_SKIPPED("Unable to generate valid keys");
+    return;
+  }
 
   // Use k2 to wrap k1.
   CK_MECHANISM wrap_mechanism = {CKM_DES_ECB, NULL_PTR, 0};
@@ -62,11 +66,18 @@ TEST_F(RWEitherSessionTest, TookanAttackA2) {
     // First, create a sensitive key k1.
   vector<CK_ATTRIBUTE_TYPE> k1_attrs = {CKA_SENSITIVE};
   SecretKey k1(session_, k1_attrs);
+  if (!k1.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
 
   // Second, create a keypair k2 with wrap (public) & decrypt (private)
   vector<CK_ATTRIBUTE_TYPE> k2_public_attrs = {CKA_WRAP};
   vector<CK_ATTRIBUTE_TYPE> k2_private_attrs = {CKA_DECRYPT};
   KeyPair k2(session_, k2_public_attrs, k2_private_attrs);
+  if (!k2.valid()) {
+    TEST_SKIPPED("Unable to generate valid keypair");
+  }
   // Use k2 to wrap k1.
   CK_MECHANISM wrap_mechanism = {CKM_RSA_PKCS, NULL_PTR, 0};
   CK_BYTE data[4096];
@@ -95,6 +106,10 @@ TEST_F(RWUserSessionTest, TookanAttackA3) {
   // Create a sensitive key.
   vector<CK_ATTRIBUTE_TYPE> key_attrs = {CKA_SENSITIVE};
   SecretKey key(session_, key_attrs);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
   // Retrieve its value
   CK_BYTE data[4096];
   CK_ATTRIBUTE attr = {CKA_VALUE, data, sizeof(data)};
@@ -110,6 +125,10 @@ TEST_F(RWUserSessionTest, TookanAttackA4) {
   key_attrs.push_back(extractable_attr);
   key_attrs.push_back(sensitive_attr);
   SecretKey key(session_, key_attrs);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
   // Retrieve its value
   CK_BYTE data[4096];
   CK_ATTRIBUTE attr = {CKA_VALUE, data, sizeof(data)};
@@ -121,6 +140,10 @@ TEST_F(RWUserSessionTest, TookanAttackA5a) {
   // Create a sensitive key.
   vector<CK_ATTRIBUTE_TYPE> key_attrs = {CKA_SENSITIVE};
   SecretKey key(session_, key_attrs);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
 
   // Try to change it to be non-sensitive
   CK_ATTRIBUTE attr = {CKA_SENSITIVE, (CK_VOID_PTR)&g_ck_false, sizeof(CK_BBOOL)};
@@ -142,6 +165,10 @@ TEST_F(RWUserSessionTest, TookanAttackA5b) {
   key_attrs.push_back(extractable_attr);
   key_attrs.push_back(sensitive_attr);
   SecretKey key(session_, key_attrs);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
 
   // Try to change it to be extractable
   CK_ATTRIBUTE attr = {CKA_EXTRACTABLE, (CK_VOID_PTR)&g_ck_true, sizeof(CK_BBOOL)};

@@ -37,7 +37,12 @@ class KeyPairTest : public RWUserSessionTest {
   KeyPairTest()
     : public_attrs_({CKA_ENCRYPT, CKA_TOKEN}),
       private_attrs_({CKA_DECRYPT, CKA_TOKEN}),
-      keypair_(session_, public_attrs_, private_attrs_) {}
+      keypair_(session_, public_attrs_, private_attrs_) {
+    if (!keypair_.valid()) {
+      TEST_SKIPPED("Unable to generate valid keypair");
+      return;
+    }
+  }
  protected:
   vector<CK_ATTRIBUTE_TYPE> public_attrs_;
   vector<CK_ATTRIBUTE_TYPE> private_attrs_;
@@ -156,6 +161,9 @@ TEST_F(RWUserSessionTest, ExtractKeys) {
   vector<CK_ATTRIBUTE_TYPE> public_attrs = {CKA_ENCRYPT};
   vector<CK_ATTRIBUTE_TYPE> private_attrs = {CKA_DECRYPT, CKA_SENSITIVE};
   KeyPair keypair(session_, public_attrs, private_attrs);
+  if (!keypair.valid()) {
+    TEST_SKIPPED("Unable to generate valid keypair");
+  }
 
   // Should be able to retrieve the modulus and public exponent.
   CK_BYTE modulus[512];

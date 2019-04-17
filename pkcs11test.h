@@ -247,9 +247,12 @@ class SecretKey {
       attrs_.push_back(valuelen);
     }
     CK_MECHANISM mechanism = {keygen_mechanism, NULL_PTR, 0};
-    EXPECT_CKR_OK(g_fns->C_GenerateKey(session_, &mechanism,
-                                       attrs_.data(), attrs_.size(),
-                                       &key_));
+    CK_RV rv = g_fns->C_GenerateKey(session_, &mechanism,
+                                   attrs_.data(), attrs_.size(),
+                                   &key_);
+    if (rv != CKR_MECHANISM_INVALID) {
+      EXPECT_CKR_OK(rv);
+    }
   }
   ~SecretKey() {
     if (key_ != INVALID_OBJECT_HANDLE) {
@@ -281,10 +284,13 @@ class KeyPair {
     public_attrs_.push_back(public_exponent);
 
     CK_MECHANISM mechanism = {CKM_RSA_PKCS_KEY_PAIR_GEN, NULL_PTR, 0};
-    EXPECT_CKR_OK(g_fns->C_GenerateKeyPair(session_, &mechanism,
-                                           public_attrs_.data(), public_attrs_.size(),
-                                           private_attrs_.data(), private_attrs_.size(),
-                                           &public_key_, &private_key_));
+    CK_RV rv = g_fns->C_GenerateKeyPair(session_, &mechanism,
+                                       public_attrs_.data(), public_attrs_.size(),
+                                       private_attrs_.data(), private_attrs_.size(),
+                                       &public_key_, &private_key_);
+    if (rv != CKR_MECHANISM_INVALID) {
+      EXPECT_CKR_OK(rv);
+    }
   }
   ~KeyPair() {
     if (public_key_ != INVALID_OBJECT_HANDLE) {
@@ -320,6 +326,10 @@ class SecretKeyTest : public ROUserSessionTest,
       mechanism_({info_.mode,
                   (info_.has_iv ? iv_.get() : NULL_PTR),
                   (info_.has_iv ? (CK_ULONG)info_.blocksize : 0)}) {
+    if (!key_.valid()) {
+      TEST_SKIPPED("Unable to generate valid secret key");
+      return;
+    }
     if (g_verbose && info_.has_iv)
       std::cout << "IV: " << hex_data(iv_.get(), info_.blocksize) << std::endl;
     if (g_verbose)

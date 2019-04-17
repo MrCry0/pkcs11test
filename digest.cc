@@ -184,6 +184,10 @@ TEST_P(DigestTest, DigestKey) {
 
   vector<CK_ATTRIBUTE_TYPE> attrs = {CKA_ENCRYPT, CKA_DECRYPT};
   SecretKey key(session_, attrs, CKM_DES_KEY_GEN);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
 
   rv = g_fns->C_DigestKey(session_, key.handle());
   if (rv == CKR_KEY_INDIGESTIBLE) {
@@ -206,6 +210,10 @@ TEST_P(DigestTest, DigestKeyInvalid) {
 
   vector<CK_ATTRIBUTE_TYPE> attrs = {CKA_ENCRYPT, CKA_DECRYPT};
   SecretKey key(session_, attrs, CKM_DES_KEY_GEN);
+  if (!key.valid()) {
+    TEST_SKIPPED("Unable to generate valid key");
+    return;
+  }
 
   rv = g_fns->C_DigestKey(session_, key.handle());
   if (rv == CKR_KEY_INDIGESTIBLE) {
