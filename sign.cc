@@ -42,7 +42,6 @@ class SignTest : public ROUserSessionTest,
     : info_(kSignatureInfo[GetParam()]),
       public_attrs_({CKA_VERIFY}),
       private_attrs_({CKA_SIGN}),
-      keypair_(session_, public_attrs_, private_attrs_),
       datalen_(std::rand() % info_.max_data),
       data_(randmalloc(datalen_)),
       mechanism_({info_.alg, NULL_PTR, 0}) {
@@ -51,7 +50,6 @@ class SignTest : public ROUserSessionTest,
   SignatureInfo info_;
   vector<CK_ATTRIBUTE_TYPE> public_attrs_;
   vector<CK_ATTRIBUTE_TYPE> private_attrs_;
-  KeyPair keypair_;
   const int datalen_;
   unique_ptr<CK_BYTE, freer> data_;
   CK_MECHANISM mechanism_;
@@ -67,20 +65,32 @@ class SignTest : public ROUserSessionTest,
       return; \
     }
 
+#define SKIP_IF_KEYPAIR_INVALID(rv) \
+    if (!keypair.valid()) {  \
+      stringstream ss; \
+      ss << "Unable to generate keypair for mechanism " << mechanism_type_name(mechanism_.mechanism); \
+      TEST_SKIPPED(ss.str()); \
+      return; \
+    }
+
 TEST_P(SignTest, SignVerify) {
-  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair_.private_handle());
+  KeyPair keypair(session_, public_attrs_, private_attrs_);
+  SKIP_IF_KEYPAIR_INVALID(rv);
+  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair.private_handle());
   SKIP_IF_UNIMPLEMENTED_RV(rv);
   ASSERT_CKR_OK(rv);
   CK_BYTE output[1024];
   CK_ULONG output_len = sizeof(output);
   EXPECT_CKR_OK(g_fns->C_Sign(session_, data_.get(), datalen_, output, &output_len));
 
-  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair_.public_handle()));
+  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair.public_handle()));
   EXPECT_CKR_OK(g_fns->C_Verify(session_, data_.get(), datalen_, output, output_len));
 }
 
 TEST_P(SignTest, SignFailVerifyWrong) {
-  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair_.private_handle());
+  KeyPair keypair(session_, public_attrs_, private_attrs_);
+  SKIP_IF_KEYPAIR_INVALID(rv);
+  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair.private_handle());
   SKIP_IF_UNIMPLEMENTED_RV(rv);
   ASSERT_CKR_OK(rv);
   CK_BYTE output[1024];
@@ -90,20 +100,22 @@ TEST_P(SignTest, SignFailVerifyWrong) {
   // Corrupt one byte of the signature.
   output[0]++;
 
-  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair_.public_handle()));
+  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair.public_handle()));
   EXPECT_CKR(CKR_SIGNATURE_INVALID,
              g_fns->C_Verify(session_, data_.get(), datalen_, output, output_len));
 }
 
 TEST_P(SignTest, SignFailVerifyShort) {
-  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair_.private_handle());
+  KeyPair keypair(session_, public_attrs_, private_attrs_);
+  SKIP_IF_KEYPAIR_INVALID(rv);
+  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair.private_handle());
   SKIP_IF_UNIMPLEMENTED_RV(rv);
   ASSERT_CKR_OK(rv);
   CK_BYTE output[1024];
   CK_ULONG output_len = sizeof(output);
   EXPECT_CKR_OK(g_fns->C_Sign(session_, data_.get(), datalen_, output, &output_len));
 
-  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair_.public_handle()));
+  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair.public_handle()));
   EXPECT_CKR(CKR_SIGNATURE_LEN_RANGE,
              g_fns->C_Verify(session_, data_.get(), datalen_, output, 4));
 }
