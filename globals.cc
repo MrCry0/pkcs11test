@@ -39,6 +39,14 @@ std::map<std::string, HmacInfo> kHmacInfo = {
   {"SHA512-HMAC", {CKM_SHA512_HMAC, 512/8}},
 };
 
+std::map<std::string, EccParams> kEccParams = {
+  {"NIST-SECP192R1", {{0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x01}}},
+  {"NIST-SECP224R1", {{0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x21}}},
+  {"NIST-SECP256R1", {{0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07}}},
+  {"NIST-SECP384R1", {{0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x22}}},
+  {"NIST-SECP521R1", {{0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x23}}},
+};
+
 std::map<std::string, SignatureInfo> kSignatureInfo = {
   // CKM_RSA_PKCS has restrictions on data sizes (see PKCS#11 s12.1.6 table 37).
   {"RSA", {CKM_RSA_PKCS, 64}},
@@ -48,6 +56,12 @@ std::map<std::string, SignatureInfo> kSignatureInfo = {
   {"SHA256-RSA", {CKM_SHA256_RSA_PKCS, 1024}},
   {"SHA384-RSA", {CKM_SHA384_RSA_PKCS, 1024}},
   {"SHA512-RSA", {CKM_SHA512_RSA_PKCS, 1024}},
+  {"ECDSA", {CKM_ECDSA, 1024}},
+  {"SHA1-ECDSA", {CKM_ECDSA_SHA1, 1024}},
+  {"SHA224-ECDSA", {CKM_ECDSA_SHA224, 1024}},
+  {"SHA256-ECDSA", {CKM_ECDSA_SHA256, 1024}},
+  {"SHA384-ECDSA", {CKM_ECDSA_SHA384, 1024}},
+  {"SHA512-ECDSA", {CKM_ECDSA_SHA512, 1024}},
 };
 
 std::map<std::string, CipherInfo> kCipherInfo = {

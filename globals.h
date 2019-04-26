@@ -55,6 +55,11 @@ struct HmacInfo {
 };
 extern std::map<std::string, HmacInfo> kHmacInfo;
 
+struct EccParams {
+  std::string der;
+};
+extern std::map<std::string, EccParams> kEccParams;
+
 struct SignatureInfo {
   CK_MECHANISM_TYPE alg;
   int max_data;
