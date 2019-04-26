@@ -312,6 +312,50 @@ class KeyPair {
   CK_OBJECT_HANDLE private_key_;
 };
 
+class KeyPairEC {
+ public:
+  // Create an EC keypair with the given lists of (boolean) attributes set to true.
+  KeyPairEC(CK_SESSION_HANDLE session,
+          const std::string& ec_params_der,
+          const ObjectAttributes& public_attrs,
+          const ObjectAttributes& private_attrs)
+    : session_(session),
+      public_attrs_(public_attrs), private_attrs_(private_attrs),
+      public_key_(INVALID_OBJECT_HANDLE), private_key_(INVALID_OBJECT_HANDLE) {
+    CK_OBJECT_CLASS public_type = CKO_PUBLIC_KEY;
+    public_attrs_.push_back({CKA_CLASS, &public_type, sizeof(public_type)});
+    public_attrs_.push_back({CKA_EC_PARAMS, (CK_BYTE_PTR)ec_params_der.data(), ec_params_der.size()});
+    CK_OBJECT_CLASS private_type = CKO_PRIVATE_KEY;
+    private_attrs_.push_back({CKA_CLASS, &private_type, sizeof(private_type)});
+    CK_MECHANISM mechanism = {CKM_EC_KEY_PAIR_GEN, NULL_PTR, 0};
+    CK_RV rv = g_fns->C_GenerateKeyPair(session_, &mechanism,
+                                       public_attrs_.data(), public_attrs_.size(),
+                                       private_attrs_.data(), private_attrs_.size(),
+                                       &public_key_, &private_key_);
+    if (rv != CKR_MECHANISM_INVALID) {
+      EXPECT_CKR_OK(rv);
+    }
+  }
+  ~KeyPairEC() {
+    if (public_key_ != INVALID_OBJECT_HANDLE) {
+      EXPECT_CKR_OK(g_fns->C_DestroyObject(session_, public_key_));
+    }
+    if (private_key_ != INVALID_OBJECT_HANDLE) {
+      EXPECT_CKR_OK(g_fns->C_DestroyObject(session_, private_key_));
+    }
+  }
+  bool valid() const { return (public_key_ != INVALID_OBJECT_HANDLE); }
+  CK_OBJECT_HANDLE public_handle() const { return public_key_; }
+  CK_OBJECT_HANDLE private_handle() const { return private_key_; }
+
+ private:
+  CK_SESSION_HANDLE session_;
+  ObjectAttributes public_attrs_;
+  ObjectAttributes private_attrs_;
+  CK_OBJECT_HANDLE public_key_;
+  CK_OBJECT_HANDLE private_key_;
+};
+
 // Test fixture for tests involving a secret key.
 class SecretKeyTest : public ROUserSessionTest,
                       public ::testing::WithParamInterface<std::string> {
