@@ -27,6 +27,7 @@
 //   C_VerifyRecoverInit
 //   C_VerifyRecover
 #include "pkcs11test.h"
+#include "sha512.hh"
 
 using namespace std;  // So sue me
 
@@ -51,6 +52,42 @@ class SignTest : public ROUserSessionTest,
   vector<CK_ATTRIBUTE_TYPE> public_attrs_;
   vector<CK_ATTRIBUTE_TYPE> private_attrs_;
   const int datalen_;
+  unique_ptr<CK_BYTE, freer> data_;
+  CK_MECHANISM mechanism_;
+};
+
+class SignTestEC : public ROUserSessionTest,
+                   public ::testing::WithParamInterface<string> {
+ public:
+  SignTestEC()
+    : info_(kSignatureInfo["ECDSA"]),
+      ec_params_(kEccParams[GetParam()]),
+      public_attrs_({CKA_VERIFY}),
+      private_attrs_({CKA_SIGN}),
+      mechanism_({info_.alg, NULL_PTR, 0}) {
+    int rand_len = std::rand() % info_.max_data;
+    if (mechanism_.mechanism == CKM_ECDSA) {
+      unique_ptr<CK_BYTE, freer> rand_data = randmalloc(rand_len);
+      string sha512 = sw::sha512::calculate(rand_data.get(), rand_len);
+      datalen_ = 64; /* SHA512 */
+      data_ = randmalloc(datalen_);
+      char buf[2];
+      for (int i = 0; i < datalen_; i++) {
+        buf[0] = sha512.c_str()[i * 2];
+        buf[1] = sha512.c_str()[i * 2 + 1];
+        data_.get()[i] = strtoul(buf, NULL, 16);
+      }
+    } else {
+      datalen_ = rand_len;
+      data_ = randmalloc(datalen_);
+    }
+  }
+ protected:
+  SignatureInfo info_;
+  EccParams ec_params_;
+  vector<CK_ATTRIBUTE_TYPE> public_attrs_;
+  vector<CK_ATTRIBUTE_TYPE> private_attrs_;
+  int datalen_;
   unique_ptr<CK_BYTE, freer> data_;
   CK_MECHANISM mechanism_;
 };
@@ -166,6 +203,60 @@ INSTANTIATE_TEST_CASE_P(Signatures, SignTest,
                                           "SHA256-RSA",
                                           "SHA384-RSA",
                                           "SHA512-RSA"));
+
+TEST_P(SignTestEC, SignVerify) {
+  KeyPairEC keypair(session_, ec_params_.der, public_attrs_, private_attrs_);
+  SKIP_IF_KEYPAIR_INVALID(rv);
+  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair.private_handle());
+  SKIP_IF_UNIMPLEMENTED_RV(rv);
+  ASSERT_CKR_OK(rv);
+  CK_BYTE output[1024];
+  CK_ULONG output_len = sizeof(output);
+  EXPECT_CKR_OK(g_fns->C_Sign(session_, data_.get(), datalen_, output, &output_len));
+
+  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair.public_handle()));
+  EXPECT_CKR_OK(g_fns->C_Verify(session_, data_.get(), datalen_, output, output_len));
+}
+
+TEST_P(SignTestEC, SignFailVerifyWrong) {
+  KeyPairEC keypair(session_, ec_params_.der, public_attrs_, private_attrs_);
+  SKIP_IF_KEYPAIR_INVALID(rv);
+  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair.private_handle());
+  SKIP_IF_UNIMPLEMENTED_RV(rv);
+  ASSERT_CKR_OK(rv);
+  CK_BYTE output[1024];
+  CK_ULONG output_len = sizeof(output);
+  EXPECT_CKR_OK(g_fns->C_Sign(session_, data_.get(), datalen_, output, &output_len));
+
+  // Corrupt one byte of the signature.
+  output[0]++;
+
+  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair.public_handle()));
+  EXPECT_CKR(CKR_SIGNATURE_INVALID,
+             g_fns->C_Verify(session_, data_.get(), datalen_, output, output_len));
+}
+
+TEST_P(SignTestEC, SignFailVerifyShort) {
+  KeyPairEC keypair(session_, ec_params_.der, public_attrs_, private_attrs_);
+  SKIP_IF_KEYPAIR_INVALID(rv);
+  CK_RV rv = g_fns->C_SignInit(session_, &mechanism_, keypair.private_handle());
+  SKIP_IF_UNIMPLEMENTED_RV(rv);
+  ASSERT_CKR_OK(rv);
+  CK_BYTE output[1024];
+  CK_ULONG output_len = sizeof(output);
+  EXPECT_CKR_OK(g_fns->C_Sign(session_, data_.get(), datalen_, output, &output_len));
+
+  ASSERT_CKR_OK(g_fns->C_VerifyInit(session_, &mechanism_, keypair.public_handle()));
+  EXPECT_CKR(CKR_SIGNATURE_LEN_RANGE,
+             g_fns->C_Verify(session_, data_.get(), datalen_, output, 4));
+}
+
+INSTANTIATE_TEST_CASE_P(SignaturesEC, SignTestEC,
+                        ::testing::Values("NIST-SECP192R1",
+                                          "NIST-SECP224R1",
+                                          "NIST-SECP256R1",
+                                          "NIST-SECP384R1",
+                                          "NIST-SECP521R1"));
 
 }  // namespace test
 }  // namespace pkcs11
