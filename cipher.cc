@@ -44,10 +44,6 @@ struct TestData {
 };
 
 map<string, vector<TestData> > kTestVectors = {
-  { "DES-ECB", {{"8000000000000000", "", "0000000000000000", "95A8D72813DAA94D"},
-                {"4000000000000000", "", "0000000000000000", "0EEC1487DD8C26D5"}, }},
-  { "3DES-ECB", {{"800000000000000000000000000000000000000000000000", "", "0000000000000000", "95A8D72813DAA94D"},
-                 {"020202020202020202020202020202020202020202020202", "", "0202020202020202", "E127C2B61D98E6E2"}, }},
   { "AES-ECB", {{"2b7e151628aed2a6abf7158809cf4f3c", "", "6bc1bee22e409f96e93d7e117393172a", "3ad77bb40d7a3660a89ecaf32466ef97"},
                 {"2b7e151628aed2a6abf7158809cf4f3c", "", "ae2d8a571e03ac9c9eb76fac45af8e51", "f5d3d58503b9699de785895a96fdbaaf"}, }},
   { "AES-CBC", {{"2b7e151628aed2a6abf7158809cf4f3c", "000102030405060708090A0B0C0D0E0F", "6bc1bee22e409f96e93d7e117393172a", "7649abac8119b246cee98e9b12e9197d"},
@@ -590,17 +586,13 @@ TEST_P(SecretKeyTest, DecryptFinalErrors2) {
 }
 
 INSTANTIATE_TEST_CASE_P(Ciphers, SecretKeyTest,
-                        ::testing::Values("DES-ECB",
-                                          "DES-CBC",
-                                          "3DES-ECB",
-                                          "3DES-CBC",
-                                          "AES-ECB",
+                        ::testing::Values("AES-ECB",
                                           "AES-CBC"));
 
 TEST_F(ROUserSessionTest, CreateSecretKeyAttributes) {
   string key = hex_decode("");
   CK_OBJECT_CLASS key_class = CKO_SECRET_KEY;
-  CK_KEY_TYPE key_type = CKK_DES;
+  CK_KEY_TYPE key_type = CKK_AES;
   vector<CK_ATTRIBUTE> attrs = {
     {CKA_LABEL, (CK_VOID_PTR)g_label, g_label_len},
     {CKA_ENCRYPT, (CK_VOID_PTR)&g_ck_true, sizeof(CK_BBOOL)},
