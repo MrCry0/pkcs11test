@@ -132,12 +132,16 @@ TEST_F(KeyPairTest, EncryptDecrypt) {
 TEST_F(RWUserSessionTest, PublicExponent4Bytes) {
   CK_ULONG modulus_bits = 1024;
   CK_BYTE public_exponent_value[] = {0x00, 0x1, 0x0, 0x1}; // 65537=0x00010001
+  CK_OBJECT_CLASS public_type = CKO_PUBLIC_KEY;
   vector<CK_ATTRIBUTE> public_attrs = {
+    {CKA_CLASS, &public_type, sizeof(public_type)},
     {CKA_ENCRYPT},
     {CKA_MODULUS_BITS, &modulus_bits, sizeof(modulus_bits)},
     {CKA_PUBLIC_EXPONENT, public_exponent_value, sizeof(public_exponent_value)},
   };
+  CK_OBJECT_CLASS private_type = CKO_PRIVATE_KEY;
   vector<CK_ATTRIBUTE> private_attrs = {
+    {CKA_CLASS, &private_type, sizeof(private_type)},
     {CKA_DECRYPT},
   };
   CK_MECHANISM mechanism = {CKM_RSA_PKCS_KEY_PAIR_GEN, NULL_PTR, 0};
