@@ -267,7 +267,8 @@ TEST_P(SecretKeyTest, EncryptDecryptInitInvalid) {
   EXPECT_CKR(CKR_OPERATION_ACTIVE,
              g_fns->C_EncryptInit(session_, &mechanism_, key_.handle()));
 
-  EXPECT_CKR_OK(g_fns->C_DecryptInit(session_, &mechanism_, key_.handle()));
+  rv = g_fns->C_DecryptInit(session_, &mechanism_, key_.handle());
+  EXPECT_TRUE(rv == CKR_OK  || rv == CKR_OPERATION_ACTIVE) << " rv=" << CK_RV_(rv);
   EXPECT_CKR(CKR_OPERATION_ACTIVE,
              g_fns->C_DecryptInit(session_, &mechanism_, key_.handle()));
 }
