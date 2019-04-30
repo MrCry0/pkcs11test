@@ -19,7 +19,7 @@ endif
 
 GTEST_DIR=gtest-1.6.0
 GTEST_INC=-isystem $(GTEST_DIR)/include
-CXXFLAGS+=-Ithird_party/pkcs11  $(GTEST_INC) -g -std=c++0x -Wall
+CXXFLAGS+=-Ithird_party/pkcs11  $(GTEST_INC) -g -std=c++0x -Wall -Wno-narrowing
 OBJECTS=pkcs11test.o pkcs11-describe.o describe.o globals.o init.o slot.o session.o object.o login.o rng.o tookan.o keypair.o cipher.o digest.o sign.o hmac.o key.o dual.o
 
 pkcs11test: $(OBJECTS) libgtest.a
