@@ -26,7 +26,7 @@ CK_FLAGS g_token_flags;
 CK_UTF8CHAR g_token_label[32];
 const char* g_user_pin = "useruser";
 const char* g_reset_user_pin = "12345678";
-const char* g_so_pin = "sososo";
+const char* g_so_pin = "sosososo";
 const char* g_reset_so_pin = "87654321";
 
 // Algorithm information.
