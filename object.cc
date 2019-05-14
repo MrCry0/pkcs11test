@@ -233,6 +233,56 @@ TEST_F(ReadWriteSessionTest, CreateCopyDestroyObject) {
   EXPECT_EQ(expected_objects, test_objects);
 }
 
+TEST_F(ReadWriteSessionTest, CreateDestroyCertificateObject) {
+  // Create a certificate object.
+  CK_OBJECT_CLASS data_class = CKO_CERTIFICATE;
+  // Self-signed certificate generated with openssl
+  string cert = hex_decode("308201D43082017AA003020102020900BB682C81CD84AEDE300A06082A8648CE"
+                           "3D0403023045310B30090603550406130242523113301106035504080C0A536F"
+                           "6D652D53746174653121301F060355040A0C18496E7465726E65742057696467"
+                           "69747320507479204C7464301E170D3139303531343137353730335A170D3239"
+                           "303530313137353730335A3045310B3009060355040613024252311330110603"
+                           "5504080C0A536F6D652D53746174653121301F060355040A0C18496E7465726E"
+                           "6574205769646769747320507479204C74643059301306072A8648CE3D020106"
+                           "082A8648CE3D0301070342000424F4C55BBBCE17647B622AFC4175D8B2CFFB23"
+                           "4F2181E117E510B81A0036052829162CF8A40DF8AC5BF1EB2A1C8B56043210E9"
+                           "6D52E7F5601F8870B9FFFC0CCDA3533051301D0603551D0E04160414DD921037"
+                           "50DDC69710DADF417490D76ABE15C214301F0603551D23041830168014DD9210"
+                           "3750DDC69710DADF417490D76ABE15C214300F0603551D130101FF0405300301"
+                           "01FF300A06082A8648CE3D0403020348003045022100B790701A94266209C332"
+                           "928983C8735663828B57B0822FBE85C9E370D9D0263B02206843D7C9A252F5A5"
+                           "69BEFBF23FE7BF28783E7A19CEBE4324324483417E59D8DD");
+  string subject = hex_decode("3045310B30090603550406130242523113301106035504080C0A536F6D652D53"
+                              "746174653121301F060355040A0C18496E7465726E6574205769646769747320"
+                              "507479204C7464");
+  string serial_number = hex_decode("020900BB682C81CD84AEDE");
+  CK_CERTIFICATE_TYPE cert_type = CKC_X_509;
+  CK_ATTRIBUTE attrs[] = {
+    {CKA_CLASS, &data_class, sizeof(data_class)},
+    {CKA_CERTIFICATE_TYPE, (CK_VOID_PTR)&cert_type, sizeof(cert_type)},
+    {CKA_TOKEN, &g_ck_false, sizeof(g_ck_false)},  // Session object
+    {CKA_VALUE, (CK_VOID_PTR)cert.data(), cert.size()},
+    {CKA_SUBJECT, (CK_VOID_PTR)subject.data(), subject.size()},
+    {CKA_ISSUER, (CK_VOID_PTR)subject.data(), subject.size()},
+    {CKA_SERIAL_NUMBER, (CK_VOID_PTR)serial_number.data(), serial_number.size()},
+  };
+  CK_ULONG num_attrs = sizeof(attrs) / sizeof(attrs[0]);
+  CK_OBJECT_HANDLE object;
+  ASSERT_CKR_OK(g_fns->C_CreateObject(session_, attrs, num_attrs, &object));
+
+  // Check each attribute in turn.
+  CK_BYTE buffer[1024];
+  for (size_t ii = 0; ii < num_attrs; ii++) {
+    CK_ATTRIBUTE get_attr = {attrs[ii].type, buffer, attrs[ii].ulValueLen};
+    EXPECT_CKR_OK(g_fns->C_GetAttributeValue(session_, object, &get_attr, 1));
+    EXPECT_EQ(attrs[ii].type, get_attr.type);
+    EXPECT_EQ(attrs[ii].ulValueLen, get_attr.ulValueLen);
+    EXPECT_EQ(0, memcmp(buffer, attrs[ii].pValue, attrs[ii].ulValueLen));
+  }
+
+  EXPECT_CKR_OK(g_fns->C_DestroyObject(session_, object));
+}
+
 TEST_F(ReadWriteSessionTest, CreateObjectInvalid) {
   CK_OBJECT_CLASS data_class = CKO_DATA;
   CK_UTF8CHAR app[] = "pkcs11test";
