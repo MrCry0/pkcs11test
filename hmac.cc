@@ -188,14 +188,16 @@ TEST_F(ROUserSessionTest, HmacTestVectors) {
         {CKA_KEY_TYPE, (CK_VOID_PTR)&key_type, sizeof(key_type)},
         {CKA_VALUE, (CK_VOID_PTR)key.data(), key.size()},
       };
-      CK_OBJECT_HANDLE key_object;
+      CK_OBJECT_HANDLE key_object = INVALID_OBJECT_HANDLE;
       ASSERT_CKR_OK(g_fns->C_CreateObject(session_, attrs.data(), attrs.size(), &key_object));
 
       CK_MECHANISM mechanism = {info.hmac, NULL_PTR, 0};
 
       CK_RV rv = g_fns->C_SignInit(session_, &mechanism, key_object);
-      if (rv == CKR_MECHANISM_INVALID)
+      if (rv == CKR_MECHANISM_INVALID) {
+        g_fns->C_DestroyObject(session_, key_object);
         continue;
+      }
       ASSERT_CKR_OK(rv);
 
       string data = hex_decode(testcase.data);
@@ -204,6 +206,7 @@ TEST_F(ROUserSessionTest, HmacTestVectors) {
       EXPECT_CKR_OK(g_fns->C_Sign(session_, (CK_BYTE_PTR)data.data(), data.size(), output, &output_len));
       string output_hex = hex_data(output, output_len);
       EXPECT_EQ(testcase.hash, output_hex);
+      g_fns->C_DestroyObject(session_, key_object);
     }
   }
 }
